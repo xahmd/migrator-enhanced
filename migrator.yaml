@@ -1,0 +1,9 @@
+baseLocation: test/migrations
+driver: postgres
+dataSource: "host=localhost user=postgres password=yourpassword dbname=migrator_test port=5432 sslmode=disable"
+singleMigrations:
+  - ref
+  - config
+tenantMigrations:
+  - tenants
+port: 8080

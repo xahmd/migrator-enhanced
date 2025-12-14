@@ -1,0 +1,72 @@
+version: "3.0"
+services:
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.1.3
+    command: --config /oauth2-proxy.cfg
+    hostname: gateway
+    volumes:
+      - "./oauth2-proxy.cfg:/oauth2-proxy.cfg"
+    # oauth2-proxy dies when not able to connect to keycloak
+    restart: unless-stopped
+    networks:
+      keycloak: {}
+      haproxy: {}
+      oauth2-proxy: {}
+    depends_on:
+      - haproxy
+      - keycloak
+    ports:
+      - 4180:4180
+
+  haproxy:
+    image: lukasz/haproxy-auth-gateway:2.0.0
+    hostname: haproxy
+    volumes:
+      - "./haproxy/keycloak.pem:/etc/haproxy/pem/keycloak.pem"
+      - "./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
+    environment:
+      - OAUTH_PUBKEY_PATH=/etc/haproxy/pem/keycloak.pem
+      - OAUTH_ISSUER=http://keycloak.localtest.me:9080/auth/realms/master
+    networks:
+      migrator: {}
+      haproxy: {}
+    depends_on:
+      - migrator
+    ports:
+      - 8080:8080
+
+  migrator:
+    image: lukasz/migrator:2021
+    hostname: migrator
+    volumes:
+      - "./migrator.yaml:/data/migrator.yaml"
+    networks:
+      migrator: {}
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:15.0.2
+    hostname: keycloak
+    command:
+      [
+        "-b",
+        "0.0.0.0",
+        "-Djboss.socket.binding.port-offset=1000",
+        "-Dkeycloak.migration.action=import",
+        "-Dkeycloak.migration.provider=dir",
+        "-Dkeycloak.migration.dir=/realm-config",
+        "-Dkeycloak.migration.strategy=IGNORE_EXISTING",
+      ]
+    volumes:
+      - ./keycloak:/realm-config
+    networks:
+      keycloak:
+        aliases:
+          - keycloak.localtest.me
+    ports:
+      - 9080:9080
+
+networks:
+  migrator: {}
+  keycloak: {}
+  oauth2-proxy: {}
+  haproxy: {}

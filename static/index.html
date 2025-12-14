@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Migration Tool</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Database Migration Tool</h1>
+        </header>
+
+        <main>
+            <section class="upload-section">
+                <h2>Upload File</h2>
+                <div class="upload-area" id="uploadArea">
+                    <p>Drag & drop your file here or click to browse</p>
+                    <input type="file" id="fileInput" accept=".sql,.xlsx,.xls,.csv,.json,.db,.sqlite" hidden>
+                    <button id="browseBtn">Browse Files</button>
+                </div>
+                <div id="fileInfo" class="file-info hidden">
+                    <p>Selected file: <span id="fileName"></span></p>
+                </div>
+            </section>
+
+            <section class="format-section">
+                <h2>Select Migration Options</h2>
+                <div class="options-grid">
+                    <div class="option-group">
+                        <label for="sourceFormat">Source Format:</label>
+                        <select id="sourceFormat">
+                            <option value="auto">Auto Detect</option>
+                            <option value="sql">SQL</option>
+                            <option value="excel">Excel (.xlsx/.xls)</option>
+                            <option value="csv">CSV</option>
+                            <option value="json">JSON</option>
+                            <option value="sqlite">SQLite</option>
+                        </select>
+                    </div>
+
+                    <div class="option-group">
+                        <label for="targetFormat">Target Format:</label>
+                        <select id="targetFormat">
+                            <option value="sql">SQL</option>
+                            <option value="json">JSON</option>
+                            <option value="csv">CSV</option>
+                            <option value="excel">Excel (.xlsx)</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section class="action-section">
+                <button id="migrateBtn" class="primary-btn" disabled>Start Migration</button>
+                <div id="progressBar" class="progress-bar hidden">
+                    <div class="progress-fill"></div>
+                </div>
+            </section>
+
+            <section class="results-section hidden" id="resultsSection">
+                <h2>Migration Results</h2>
+                <div class="result-content">
+                    <p id="resultMessage"></p>
+                    <div class="download-options">
+                        <button id="downloadResultBtn" class="secondary-btn">Download Migration Report</button>
+                        <button id="downloadMigratedFileBtn" class="secondary-btn">Download Migrated File</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
