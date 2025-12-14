@@ -216,4 +216,4 @@ This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENS
 
 ## 🙏 Credits
 
-This project is based on [https://github.com/lukaszbudnik/migrator](https://github.com/lukaszbudnik/migrator)
+This project is enhanced version from [https://github.com/lukaszbudnik/migrator](https://github.com/lukaszbudnik/migrator)
