@@ -1,4 +1,4 @@
-# migrator ![Build](https://github.com/lukaszbudnik/migrator/workflows/Build/badge.svg) ![Docker](https://github.com/lukaszbudnik/migrator/workflows/Docker%20Image%20CI/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/lukaszbudnik/migrator)](https://goreportcard.com/report/github.com/lukaszbudnik/migrator) [![codecov](https://codecov.io/gh/lukaszbudnik/migrator/branch/main/graph/badge.svg)](https://codecov.io/gh/lukaszbudnik/migrator)
+# migrator-enhanced version
 
 Super fast and lightweight DB migration tool written in Go. migrator outperforms other market-leading DB migration frameworks by a few orders of magnitude when comparing both execution time and memory consumption.
 
