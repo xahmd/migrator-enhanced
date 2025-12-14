@@ -2,6 +2,23 @@
 
 Super fast and lightweight DB migration tool written in Go. migrator outperforms other market-leading DB migration frameworks by a few orders of magnitude when comparing both execution time and memory consumption.
 
+## Table of Contents
+
+- [Key Features](#-key-features)
+- [Supported Databases](#-supported-databases)
+- [Installation](#-installation)
+  - [Docker Installation](#docker-installation)
+  - [Manual Installation](#manual-installation)
+  - [Dashboard Access](#dashboard-access)
+- [Overview](#-overview)
+- [Quick Start Guide](#-quick-start-guide)
+- [Project Structure](#-project-structure)
+- [Configuration](#-configuration)
+  - [Configuration File](#configuration-file)
+  - [Dashboard Configuration](#dashboard-configuration)
+- [License](#-license)
+- [Credits](#-credits)
+
 ## ✨ Key Features
 
 - **🚀 Ultra Performance**: Orders of magnitude faster than other migration tools
@@ -32,6 +49,8 @@ Super fast and lightweight DB migration tool written in Go. migrator outperforms
 
 ## 📦 Installation
 
+### Docker Installation
+
 The official docker image is available on:
 - Docker Hub: [lukasz/migrator](https://hub.docker.com/r/lukasz/migrator)
 - GitHub Container Registry: [ghcr.io/lukaszbudnik/migrator](https://github.com/lukaszbudnik/migrator/pkgs/container/migrator)
@@ -40,6 +59,47 @@ The official docker image is available on:
 docker pull lukasz/migrator:latest
 ```
 
+### Manual Installation
+
+To run migrator manually, you'll need to have Go installed on your system:
+
+1. **Install Go 1.24+**
+   Download and install Go from the [official website](https://golang.org/dl/).
+
+2. **Clone the repository**
+   ```bash
+   git clone https://github.com/xahmd/migrator-enhanced
+   cd migrator-enhanced
+   ```
+
+3. **Run the application**
+   You can run migrator directly using Go:
+   ```bash
+   go run migrator.go
+   ```
+   
+   Or build and run the binary:
+   ```bash
+   go build -o migrator migrator.go
+   ./migrator
+   ```
+
+4. **Configuration**
+   By default, migrator looks for a `migrator.yaml` configuration file in the current directory. You can specify a different configuration file using the `-configFile` flag:
+   ```bash
+   go run migrator.go -configFile=/path/to/your/config.yaml
+   ```
+
+### Dashboard Access
+
+The migrator includes a web-based dashboard for easier migration management. Once the application is running, you can access the dashboard at:
+- http://localhost:8080/static/ (default port)
+
+The dashboard allows you to:
+- Upload migration files in various formats (SQL, Excel, CSV, JSON)
+- Select source and target formats
+- Trigger migration processes
+- View migration results and download reports
 ## 🎯 Overview
 
 migrator manages and versions all DB changes for you and completely eliminates manual and error-prone administrative tasks. migrator versions can be used for auditing and compliance purposes. migrator not only supports single schemas, but also comes with multi-schema support out of the box, making it an ideal DB migrations solution for multi-tenant SaaS products.
@@ -81,6 +141,10 @@ cd migrator-enhanced
 
 ### 2. Start migrator and test DB containers
 
+You can either use Docker or run manually:
+
+#### Option A: Using Docker (Recommended for testing)
+
 Start migrator and setup test DB containers using docker-compose:
 
 ```bash
@@ -96,94 +160,20 @@ docker-compose will start and configure the following services:
 5. `mssql` - MS SQL Server, listening on port `1433`
 6. `mongodb` - MongoDB service, listening on port `27017`
 
-### 3. Play around with migrator
+#### Option B: Manual Installation
 
-Set the port and create your first migration:
+Alternatively, you can run migrator manually:
 
-```bash
-MIGRATOR_PORT=8181
-COMMIT_SHA="your-version-here"
+1. Make sure you have Go 1.24+ installed
+2. Configure your database connection in `migrator.yaml`
+3. Run the application:
+   ```bash
+   go run migrator.go
+   ```
 
-# Create new version
-curl -s -d @- http://localhost:$MIGRATOR_PORT/v2/service <<EOF | jq
-{
-  "query": "mutation CreateVersion(\$input: VersionInput!) {
-    createVersion(input: \$input) {
-      version { id, name }
-    }
-  }",
-  "variables": {
-    "input": {
-      "versionName": "$COMMIT_SHA"
-    }
-  }
-}
-EOF
-
-# Fetch migrator versions
-curl -s -d @- http://localhost:$MIGRATOR_PORT/v2/service <<EOF | jq -r ".data.versions"
-{
-  "query": "
-  query Versions {
-    versions {
-        id,
-        name,
-        created,
-      }
-  }",
-  "operationName": "Versions"
-}
-EOF
-
-# Fetch tenants
-curl -s -d @- http://localhost:$MIGRATOR_PORT/v2/service <<EOF | jq -r ".data.tenants"
-{
-  "query": "
-  query Tenants {
-    tenants {
-        name
-      }
-  }",
-  "operationName": "Tenants"
-}
-EOF
-
-# Create new tenant
-TENANT_NAME="newcustomer$RANDOM"
-VERSION_NAME="create-tenant-$TENANT_NAME"
-curl -s -d @- http://localhost:$MIGRATOR_PORT/v2/service <<EOF | jq -r '.data.createTenant'
-{
-  "query": "
-  mutation CreateTenant(\$input: TenantInput!) {
-    createTenant(input: \$input) {
-      version {
-        id,
-        name,
-      }
-      summary {
-        startedAt
-        duration
-        tenants
-        migrationsGrandTotal
-        scriptsGrandTotal
-      }
-    }
-  }",
-  "operationName": "CreateTenant",
-  "variables": {
-    "input": {
-      "versionName": "$VERSION_NAME",
-      "tenantName": "$TENANT_NAME"
-    }
-  }
-}
-EOF
-```
-
-> **💡 Tip**: For a complete GraphQL schema and production deployment guides, see the [📡 API](#-api) and [📚 Tutorials](#-tutorials) sections below.
+The application will start on port 8080 by default.
 
 ## 📁 Project Structure
-
 ```
 migrator/
 ├── converter/          # File conversion logic
@@ -197,8 +187,31 @@ migrator/
 
 The application runs on port 8080 by default. To change the port, modify the configuration in `migrator.go` or use the `port` setting in `migrator.yaml`.
 
-## 📄 License
+### Configuration File
 
+The `migrator.yaml` file contains the main configuration settings:
+
+```yaml
+baseLocation: test/migrations  # Base directory for migration files
+driver: postgres               # Database driver (postgres, mysql, mssql, mongodb)
+dataSource: "host=localhost user=postgres password=yourpassword dbname=migrator_test port=5432 sslmode=disable"  # Database connection string
+singleMigrations:
+  - ref                       # Single migration directories
+  - config
+tenantMigrations:
+  - tenants                   # Tenant migration directories
+port: 8080                   # HTTP server port
+```
+
+### Dashboard Configuration
+
+The web dashboard is served from the `/static/` endpoint and includes:
+- File upload functionality for various formats (SQL, Excel, CSV, JSON)
+- Format selection for source and target migrations
+- Progress tracking for migration operations
+- Result display with download options for reports and migrated files
+
+## 📄 License
 This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Credits
